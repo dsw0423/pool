@@ -15,10 +15,10 @@
 package pool
 
 import (
-	"context"
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 )
 
@@ -86,10 +86,7 @@ var DefaultOptions = Options{
 
 // Dial return a grpc connection with defined configurations.
 func Dial(address string) (*grpc.ClientConn, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), DialTimeout)
-	defer cancel()
-	return grpc.DialContext(ctx, address, grpc.WithInsecure(),
-		grpc.WithBackoffMaxDelay(BackoffMaxDelay),
+	return grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithInitialWindowSize(InitialWindowSize),
 		grpc.WithInitialConnWindowSize(InitialConnWindowSize),
 		grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(MaxSendMsgSize)),
@@ -103,7 +100,5 @@ func Dial(address string) (*grpc.ClientConn, error) {
 
 // DialTest return a simple grpc connection with defined configurations.
 func DialTest(address string) (*grpc.ClientConn, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), DialTimeout)
-	defer cancel()
-	return grpc.DialContext(ctx, address, grpc.WithInsecure())
+	return grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 }
